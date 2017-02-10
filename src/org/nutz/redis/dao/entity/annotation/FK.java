@@ -1,4 +1,4 @@
-package org.nutz.redis.entity.annotation;
+package org.nutz.redis.dao.entity.annotation;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;

@@ -7,7 +7,7 @@ import org.nutz.dao.pager.Pager;
  *
  * @howechiang
  */
-public interface Dao {
+public interface RDao {
 
     /**
      * 根据数据源的类型，创建一个翻页对象
