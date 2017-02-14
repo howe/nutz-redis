@@ -12,7 +12,7 @@ public class Test {
 
 
         User user = new User();
-        user.setId(11111);
+//        user.setId(11111);
         user.setComId(1);
         user.setUserName("GDV");
         user.setAddTime(Times.now());

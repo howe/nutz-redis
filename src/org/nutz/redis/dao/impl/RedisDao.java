@@ -4,16 +4,17 @@ import org.nutz.dao.pager.Pager;
 import org.nutz.ioc.aop.Aop;
 import org.nutz.json.Json;
 import org.nutz.lang.Lang;
-import org.nutz.redis.dao.ObjUtil;
 import org.nutz.redis.dao.RDao;
 import org.nutz.redis.dao.entity.annotation.FK;
 import org.nutz.redis.dao.entity.annotation.KeyPrefix;
 import org.nutz.redis.dao.entity.annotation.MK;
 import org.nutz.redis.dao.entity.annotation.Orderby;
+import org.nutz.redis.dao.util.Util;
+import sun.net.www.content.text.Generic;
 
 import java.lang.reflect.Field;
-import java.util.Set;
 
+import static org.nutz.aop.AbstractClassAgent.t;
 import static org.nutz.integration.jedis.RedisInterceptor.jedis;
 
 /**
@@ -31,7 +32,7 @@ public class RedisDao implements RDao {
     public <T> T fetch(Class<T> classOfT, String id) {
 
         String val = jedis().get(classOfT.getAnnotation(KeyPrefix.class).value() + id);
-        if(!Lang.equals(val, "nil") && !Lang.isEmpty(val))
+        if (!Lang.equals(val, "nil") && !Lang.isEmpty(val))
             return Json.fromJson(classOfT, val);
         else
             return null;
@@ -41,7 +42,7 @@ public class RedisDao implements RDao {
     @Override
     public <T> T fetch(String keyPrefix, Class<T> classOfT, String id) {
         String val = jedis().get(keyPrefix + id);
-        if(!Lang.equals(val, "nil") && !Lang.isEmpty(val))
+        if (!Lang.equals(val, "nil") && !Lang.isEmpty(val))
             return Json.fromJson(classOfT, val);
         else
             return null;
@@ -76,18 +77,23 @@ public class RedisDao implements RDao {
     @Override
     public <T> T insert(T obj) {
 
+        Object frist = Lang.first(obj);
+        if (frist == null)
+            return null;
         System.out.println(obj.getClass().getTypeName());
         for (Field f : obj.getClass().getDeclaredFields()) {
 
-            System.out.println(f.getType()+ " ----------- "+ f.getName()+ " ----------- " + ObjUtil.getValue(obj, f.getName()));
-            if(!Lang.isEmpty(f.getAnnotation(MK.class)))
+            System.out.println(f.getType() + " ----------- " + f.getName() + " ----------- " + Util.getValue(obj, f.getName()));
+            if (!Lang.isEmpty(f.getAnnotation(MK.class))) {
+                Util.setValue(obj, f.getName(), Util.getId(Util.o2l(Util.getValue(obj, f.getName()))));
                 System.out.println(f.getName() + " 注解了：" + f.getAnnotation(MK.class));
-            if(!Lang.isEmpty(f.getAnnotation(Orderby.class)))
+            }
+            if (!Lang.isEmpty(f.getAnnotation(Orderby.class)))
                 System.out.println(f.getName() + " 注解了：" + f.getAnnotation(Orderby.class));
         }
 
         StringBuffer fk = new StringBuffer();
-        for (String f : obj.getClass().getAnnotation(FK.class).value()){
+        for (String f : obj.getClass().getAnnotation(FK.class).value()) {
             fk.append(f).append(":");
         }
         System.out.println(fk);
